@@ -1,0 +1,339 @@
+
+
+% Kontrolloni dhe pastroni të dhënat për NaN dhe Inf
+X(isnan(X) | isinf(X)) = [];
+y(isnan(y) | isinf(y)) = [];
+
+% Sigurohuni që pastrimi i të dhënave të mos i ketë zbrazur të dhënat
+if isempty(X) || isempty(y)
+    error('Të gjitha të dhënat janë të pavlefshme pas pastrimit.');
+end
+
+% Kontrolloni nëse të dhënat kanë përmasa të njëjta
+if length(X) ~= length(y)
+    error('X dhe y nuk kanë të njëjtën gjatësi pas pastrimit.');
+end
+
+% Ndaj të dhënat në trajnimin dhe testimin e seteve
+cv = cvpartition(length(y), 'HoldOut', 0.2);
+idx = cv.test;
+
+X_train = X(~idx);
+y_train = y(~idx);
+X_test = X(idx);
+y_test = y(idx);
+
+% Përdorimi i modelit Gradient Boosting
+Mdl = fitrensemble(X_train, y_train, 'Method', 'LSBoost', ...
+                   'NumLearningCycles', 100, 'LearnRate', 0.1);
+
+% Bëj parashikimet
+y_pred = predict(Mdl, X_test);
+
+% Llogarit metrikat e performancës
+mae = mean(abs(y_test - y_pred));
+mse = mean((y_test - y_pred).^2);
+rmse = sqrt(mse);
+y_train_mean = mean(y_train);
+ss_tot = sum((y_test - y_train_mean).^2);
+ss_res = sum((y_test - y_pred).^2);
+r2 = 1 - (ss_res / ss_tot);
+
+fprintf('Mean Absolute Error (MAE): %.2f\n', mae);
+fprintf('Mean Squared Error (MSE): %.2f\n', mse);
+fprintf('Root Mean Squared Error (RMSE): %.2f\n', rmse);
+fprintf('R-squared (R²): %.2f\n', r2);
+
+% Parashiko konsumin e energjisë për vitet e ardhshme
+future_years = (2017:2022)';
+future_predictions = predict(Mdl, future_years);
+
+fprintf('Parashikimi i konsumit të energjisë për vitet e ardhshme:\n');
+for i = 1:length(future_years)
+    fprintf('Viti %d: %.2f GWh\n', future_years(i), future_predictions(i));
+end
+
+% Vizualizo të dhënat dhe parashikimet
+figure;
+hold on;
+scatter(X_train, y_train, 'b', 'filled');
+scatter(X_test, y_test, 'r', 'filled');
+
+% Vizualizimi i modelit Gradient Boosting
+x_range = linspace(min(X), max(X), 100)';
+y_range = predict(Mdl, x_range);
+
+plot(x_range, y_range, '-k'); % Vizualizimi i modelit Gradient Boosting
+plot(future_years, future_predictions, '--g');
+xlabel('Viti');
+ylabel('Konsumi (GWh)');
+legend('Trajnim', 'Testim', 'Gradient Boosting', 'Parashikimi');
+title('Parashikimi i Konsumit të Energjisë Elektrike');
+hold off;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% Ekstraktimi i vlerave të viteve dhe ngarkesës
+x = Viti;
+y = Ngarkesa;
+
+% Krijimi i modelit të regresionit linear
+model = fitlm(x, y);
+
+% Vitet për të cilat duam të parashikojmë konsumin (ngarkesën)
+vite_parashikim = (2017:2022)';
+
+% Parashikimi i ngarkesës për vitet e reja
+ngarkesa_parashikuar = predict(model, vite_parashikim);
+
+% Vizualizimi i të dhënave origjinale dhe parashikimeve
+figure;
+hold on;
+plot(x, y, 'bo', 'DisplayName', 'Të dhënat origjinale');
+plot(vite_parashikim, ngarkesa_parashikuar, 'r-', 'DisplayName', 'Parashikimi');
+xlabel('Viti');
+ylabel('Ngarkesa e Energjisë Elektrike');
+title('Parashikimi i Ngarkesës së Energjisë Elektrike me Regresion Linear');
+legend('show');
+
+
+
+
+
+
+
+
+
+
+% Ekstraktimi i vlerave të viteve dhe ngarkesës
+x = Viti;
+y = Ngarkesa;
+
+% Krijimi i modelit të regresionit linear
+model = fitlm(x, y);
+
+% Vitet për të cilat duam të parashikojmë konsumin (ngarkesën)
+vite_parashikim = (2017:2022)';
+
+% Parashikimi i ngarkesës për vitet e reja
+ngarkesa_parashikuar = predict(model, vite_parashikim);
+
+% Parashikimi i ngarkesës për vitet ekzistuese për të llogaritur MSE
+y_pred = predict(model, x);
+
+% Llogaritja e MSE për të dhënat ekzistuese
+mse = mean((y - y_pred).^2);
+
+% Llogaritja e R^2
+r_squared = model.Rsquared.Ordinary;
+
+% Shfaqja e MSE dhe R^2
+disp(['Mean Squared Error (MSE): ', num2str(mse)]);
+disp(['R-squared (R^2): ', num2str(r_squared)]);
+
+% Vizualizimi i të dhënave origjinale dhe parashikimeve
+figure;
+hold on;
+plot(x, y, 'bo', 'DisplayName', 'Të dhënat origjinale');
+plot(vite_parashikim, ngarkesa_parashikuar, 'r-', 'DisplayName', 'Parashikimi');
+xlabel('Viti');
+ylabel('Ngarkesa e Energjisë Elektrike');
+title('Parashikimi i Ngarkesës së Energjisë Elektrike me Regresion Linear');
+legend('show');
+hold off;
+
+
+
+
+% Të dhënat e konsumit të energjisë elektrike për periudhën 2000-2016
+x = Viti;
+y = Ngarkesa; % Vendosni të dhënat tuaja këtu
+
+% Ndërtimi i modelit të regresionit linear
+model = fitlm(x, y);
+
+% Parashikimi për periudhën 2017-2022
+future_x = (2017:2022)';
+predictions = predict(model, future_x);
+
+% Shfaqja e rezultateve
+disp('Parashikimi i konsumit të energjisë elektrike për periudhën 2017-2022:');
+for i = 1:length(future_x)
+    fprintf('%d %.3f\n', future_x(i), predictions(i));
+end
+
+% Krahasimi me vlerat e dhëna
+actual_values = [4997; 5120; 5322; 5549; 6260; 6196];
+comparison = table(future_x, predictions, actual_values, ...
+    'VariableNames', {'Year', 'Predicted', 'Actual'});
+disp(comparison);
+
+
+
+
+% Të dhënat e konsumit të energjisë elektrike për periudhën 2000-2016 dhe të dhënat aktuale
+x = Viti;
+y = Ngarkesa; % Vendosni të dhënat tuaja këtu
+actual_years = (2017:2022)';
+
+% Ndërtimi i modelit të regresionit linear
+model = fitlm(x, y);
+
+% Parashikimi për periudhën 2017-2022
+predictions = predict(model, actual_years);
+
+% Shfaqja e rezultateve të parashikimeve dhe krahasimi me vlerat e dhëna aktuale
+disp('Parashikimi i konsumit të energjisë elektrike për periudhën 2017-2022:');
+for i = 1:length(actual_years)
+    fprintf('%d    %.1f       %.0f\n',  actual_values(i));
+end
+
+
+
+
+
+
+% Të dhënat e konsumit të energjisë elektrike për periudhën 2000-2016
+x = Viti;
+y = Ngarkesa; % Vendosni të dhënat tuaja këtu
+
+% Ndërtimi i modelit të regresionit linear
+model = fitlm(x, y);
+
+% Parashikimi për periudhën 2017-2022
+future_x = (2017:2022)';
+predictions = predict(model, future_x);
+
+% Shfaqja e rezultateve
+disp('Parashikimi i konsumit të energjisë elektrike për periudhën 2017-2022:');
+for i = 1:length(future_x)
+    fprintf('%d %.3f\n', future_x(i), predictions(i));
+end
+
+% Krahasimi me vlerat e dhëna
+actual_values = [4997; 5120; 5322; 5549; 6260; 6196];
+comparison = table(future_x, predictions, actual_values, ...
+    'VariableNames', {'Year', 'Predicted', 'Actual'});
+disp(comparison);
+
+
+
+
+
+
+
+
+
+% Krijimi i modelit të regresionit linear
+p = polyfit(x, y, 1);
+
+% Vitet për të cilat duam të parashikojmë konsumin
+x_future = (2017:2022)';
+
+% Parashikimi duke përdorur modelin e krijuar
+y_predicted = polyval(p, x_future);
+
+% Vlerat aktuale për periudhën 2017-2022 për të krahasuar parashikimet
+y_actual = [4.997, 5.120, 5.322, 5.549, 6.260, 6.196]';
+
+% Shfaqja e rezultateve
+disp('Viti    Parashikimi    Vlera Aktuale');
+disp([x_future y_predicted y_actual]);
+
+% Plotësimi i grafikës
+figure;
+hold on;
+plot(x, y, 'bo-', 'DisplayName', 'Të dhënat aktuale (2000-2016)');
+plot(x_future, y_predicted, 'r*-', 'DisplayName', 'Parashikimi (2017-2022)');
+plot(x_future, y_actual, 'g*-', 'DisplayName', 'Vlerat aktuale (2017-2022)');
+xlabel('Viti');
+ylabel('Ngarkesa (GWh)');
+legend('Location', 'Best');
+grid on;
+hold off;
+
+% Të dhënat e konsumit të energjisë elektrike
+years = [2000:2022]';
+consumption = [2591, 2937, 3086, 3369, 3666, 3801, 3821, 4035, 4133, 4428, 4559, ...
+               4682, 4768, 4794, 4555, 4667, 4807, 4997, 5120, 5322, 5549, 6260, 6196]';
+
+% Të dhënat për periudhën 2000-2016
+train_years = years(1:17);
+train_consumption = consumption(1:17);
+
+% Ndërtimi i modelit të regresionit linear
+model = fitlm(train_years, train_consumption);
+
+% Parashikimi për periudhën 2017-2022
+predict_years = years(18:end);
+predicted_consumption = predict(model, predict_years);
+
+% Shfaqja e rezultateve
+disp('Viti    Konsumi (Real)    Konsumi (Parashikuar)');
+disp([predict_years, consumption(18:end), predicted_consumption]);
+
+% Vizualizimi i rezultateve
+figure;
+plot(years, consumption, 'b-o', 'DisplayName', 'Të dhënat reale');
+hold on;
+plot(predict_years, predicted_consumption, 'r--x', 'DisplayName', 'Parashikimi');
+xlabel('Viti');
+ylabel('Konsumi i energjisë (GWh)');
+legend show;
+title('Parashikimi i Konsumit të Energjisë Elektrike duke përdorur Regresionin Linear');
+grid on;
+
+
+
+
+
+
+
+
+
+% Të dhënat e konsumit të energjisë për periudhën 2000-2016
+vitet = (2000:2016)'; % Viti
+konsumi = [ngarkesa_2000_2016]; % Vlerat e konsumit të energjisë (të dhënat reale)
+
+% Definimi i rendit të modelit ARX
+na = 2; % numri i termave autoregresivë
+nb = 2; % numri i termave të variablave të jashtme (vitet)
+nk = 1; % vonesa e variablave të jashtme
+
+% Krijimi i të dhënave iddata për modelin ARX
+data = iddata(konsumi, vitet, 1);
+
+% Përshtatja e modelit ARX
+model = arx(data, [na nb nk]);
+
+% Parashikimi për vitet 2017-2022
+vitet_te_reja = (2017:2022)';
+num_steps = length(vitet_te_reja);
+Y_pred = predict(model, iddata([], vitet_te_reja, 1), num_steps);
+
+% Shfaqja e rezultateve të parashikimeve
+disp('Parashikimi i konsumit të energjisë për vitet 2017-2022:');
+disp(Y_pred.OutputData);
+
+% Vizualizimi i rezultateve (opsionale)
+figure;
+plot(vitet, konsumi, 'b.-', 'LineWidth', 1.5); % Vlerat e konsumit të energjisë të dhënave të vërteta
+hold on;
+plot(vitet_te_reja, Y_pred.OutputData, 'r.--', 'LineWidth', 1.5); % Vlerat e parashikuara për vitet e reja
+title('Parashikimi i konsumit të energjisë me modelin ARX');
+xlabel('Viti');
+ylabel('Konsumi i energjisë');
+legend('Të dhënat e vërteta 2000-2016', 'Parashikimi', 'Location', 'NorthWest');
+grid on;
+

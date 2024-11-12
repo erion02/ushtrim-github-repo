@@ -1,0 +1,22 @@
+.flex{
+    display: flex;
+    justify-content: space-around;
+    justify-content:sp;
+    font-size: large;
+    font-weight: bold;
+    text-transform: uppercase;
+  letter-spacing: 5px;
+}
+.logo{
+    font-weight: bold;
+    font-size: 50px;
+    text-align: center;
+    color:green;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+.page{
+    border-bottom: 1px solid #000;
+    border-top: 3px solid;
+  
+    
+}
